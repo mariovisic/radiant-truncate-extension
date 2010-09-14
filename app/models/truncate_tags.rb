@@ -75,10 +75,12 @@ module ActionView::Helpers::TextHelper
     text            = text.mb_chars
     options         = args.extract_options!
     truncate_string = options[:omission]  || '...'
+    truncate_string = omission_link_html(truncate_string, options[:omission_link_url], options[:omission_link])
     length          = options[:length]    || 50
 
     return text if text.length <= length
     
+    # fixme: currently this will cause problems if the string is too short or the omission is too long
     length = (length - truncate_string.mb_chars.length)
     str    = text[0, length + 1] 
 
@@ -90,7 +92,7 @@ module ActionView::Helpers::TextHelper
       last_idx = idx
       idx      = str.index(/\s/, idx.to_i + 1)
     end
-    (str[0, last_idx] + omission_link_html(truncate_string, options[:omission_link_url], options[:omission_link])).to_s
+    (str[0, last_idx] + truncate_string).to_s
   end
   
   def truncate_html(input, *args)

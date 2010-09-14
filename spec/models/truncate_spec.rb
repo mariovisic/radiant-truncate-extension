@@ -2,6 +2,10 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 describe "truncate_words" do
   include ActionView::Helpers::TextHelper
+  
+  it 'should not error if the length minus the omission is negative' do
+    truncate_words('hello', :length => 1, :omission => '...')
+  end
 
   it "should not truncate short contents" do
     truncate_words("hello", :length => 10, :omission => "...").should == "hello"
