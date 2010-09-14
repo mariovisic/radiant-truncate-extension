@@ -6,10 +6,11 @@ module TruncateTags
     meaning you won't have a &#60;p&#62; without it's closing tag. This tag may be used in
     2 modes. In one you work with HTML, in the other you work only with the text. 
     
-    In mode 1, your only options are the @length@ and the @omission@:
+    In mode 1, your only options are the @length@ the @omission@ and the @omission_link@:
     
     * @length@ is the number of words to display from the given content. This is 30 by default.
     * @omission@ is the text used inplace of the omitted content. This is "..." by default.
+    * @omission_link@ if set to 'true' will wrap the omission text in an anchor to the current page
     
     *Mode 1 Examples:*
     
@@ -38,6 +39,7 @@ module TruncateTags
     When using mode 1 (meaning @strip_html@ is *not* set, or is false) @strip_whitespace@ and @split_words@ _will be ignored_.
   }
   tag 'truncate' do |tag|
+        
     content = tag.expand
     length = tag.attr['length']
     omission = tag.attr['omission']
@@ -45,7 +47,7 @@ module TruncateTags
     options[:length] = length.to_i if length
     options[:omission] = omission if omission
     options[:omission_link] = tag.attr['omission_link'] == 'true'
-    options[:omission_link_slug] = tag.locals.page.slug
+    options[:omission_link_url] = tag.locals.page.url
     helper = ActionView::Base.new
     
     strip_html = tag.attr['strip_html'] == 'true' # defaults to false. 'true' must be explicitly set
@@ -148,7 +150,7 @@ module ActionView::Helpers::TextHelper
   		
   		unless options[:omission_link]
   		  current.content += truncate_string
-		  end
+		  end   
 
   		#remove everything else
   		while current != fragment
@@ -163,7 +165,7 @@ module ActionView::Helpers::TextHelper
   	fragment.to_html
   	
     if options[:omission_link] && has_been_truncated
-      fragment.to_html + "<a href=\"#{options[:omission_link_slug]}\">#{truncate_string}</a></a>"
+      fragment.to_html + "<a href=\"#{options[:omission_link_url]}\">#{truncate_string}</a></a>"
     else
       fragment.to_html
     end
