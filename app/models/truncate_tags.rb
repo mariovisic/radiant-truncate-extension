@@ -90,7 +90,7 @@ module ActionView::Helpers::TextHelper
       last_idx = idx
       idx      = str.index(/\s/, idx.to_i + 1)
     end
-    (str[0, last_idx] + truncate_string).to_s
+    (str[0, last_idx] + omission_link_html(truncate_string, options[:omission_link_url], options[:omission_link])).to_s
   end
   
   def truncate_html(input, *args)
@@ -170,7 +170,7 @@ module ActionView::Helpers::TextHelper
   	end
   	
   	if has_been_truncated && options[:omission_link]
-      fragment.to_html + omission_link_html(truncate_string, options[:omission_link_url])
+      fragment.to_html + omission_html(truncate_string, options[:omission_link_url])
     else
       fragment.to_html
     end
@@ -179,8 +179,12 @@ module ActionView::Helpers::TextHelper
   
   private
   
-  def omission_link_html(string, omission_link_url)
-    "<a href=\"#{omission_link_url}\">#{string}</a>"
+  def omission_link_html(string, omission_link_url, omission_link = true)
+    if omission_link
+      "<a href=\"#{omission_link_url}\">#{string}</a>"
+    else
+      string
+    end
   end
   
 end
