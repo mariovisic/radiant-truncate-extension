@@ -44,6 +44,8 @@ module TruncateTags
     options = {}
     options[:length] = length.to_i if length
     options[:omission] = omission if omission
+    options[:omission_link] = tag.attr['omission_link'] == 'true'
+    options[:omission_link_slug] = tag.locals.page.slug
     helper = ActionView::Base.new
     
     strip_html = tag.attr['strip_html'] == 'true' # defaults to false. 'true' must be explicitly set
@@ -87,6 +89,7 @@ module ActionView::Helpers::TextHelper
     truncate_string = options[:omission] || '...'
     num_words = (options[:length] || 30).to_i
   	fragment = Nokogiri::HTML.fragment(input)
+  	has_been_truncated = false
 
   	current = fragment.children.first
   	count = 0
@@ -129,7 +132,8 @@ module ActionView::Helpers::TextHelper
   	end
 
   	if count >= num_words
-  		new_content = current.text.split(/ /)
+  		new_content        = current.text.split(/ /)
+      has_been_truncated = true
 
   		# the most confusing part. we want to grab just the first [num_words]
   		# number of words, but this last text node could send us way over
@@ -139,8 +143,12 @@ module ActionView::Helpers::TextHelper
   		# so we subtract from the number of words in this text node.
   		# Finally we add 1 because we are doing a range and we need to get the index right.
   		new_content = new_content[0..(new_content.length-(count-num_words)+1)]
-
-  		current.content= new_content.join(' ') + truncate_string
+  		
+  		current.content= new_content.join(' ')
+  		
+  		unless options[:omission_link]
+  		  current.content += truncate_string
+		  end
 
   		#remove everything else
   		while current != fragment
@@ -151,7 +159,14 @@ module ActionView::Helpers::TextHelper
   		end
   	end
   	
-    fragment.to_html
+  	
+  	fragment.to_html
+  	
+    if options[:omission_link] && has_been_truncated
+      fragment.to_html + "<a href=\"#{options[:omission_link_slug]}\">#{truncate_string}</a></a>"
+    else
+      fragment.to_html
+    end
   end
   
 end
