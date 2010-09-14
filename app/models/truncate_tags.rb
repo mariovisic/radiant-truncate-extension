@@ -74,8 +74,8 @@ module ActionView::Helpers::TextHelper
   def truncate_words(text, *args)
     text            = text.mb_chars
     options         = args.extract_options!
-    truncate_string = options[:omission] || '...'
-    length          = options[:length] || 50
+    truncate_string = options[:omission]  || '...'
+    length          = options[:length]    || 50
 
     return text if text.length <= length
     
@@ -96,7 +96,7 @@ module ActionView::Helpers::TextHelper
   def truncate_html(input, *args)
     options            = args.extract_options!
     truncate_string    = options[:omission] || '...'
-    num_words          = (options[:length] || 30).to_i
+    num_words          = (options[:length]  || 30).to_i
   	fragment           = Nokogiri::HTML.fragment(input)
   	has_been_truncated = false
 
@@ -169,14 +169,18 @@ module ActionView::Helpers::TextHelper
   		end
   	end
   	
-  	
-  	fragment.to_html
-  	
-    if options[:omission_link] && has_been_truncated
-      fragment.to_html + "<a href=\"#{options[:omission_link_url]}\">#{truncate_string}</a></a>"
+  	if has_been_truncated && options[:omission_link]
+      fragment.to_html + omission_link_html(truncate_string, options[:omission_link_url])
     else
       fragment.to_html
     end
+
+  end
+  
+  private
+  
+  def omission_link_html(string, omission_link_url)
+    "<a href=\"#{omission_link_url}\">#{string}</a>"
   end
   
 end
