@@ -6,11 +6,12 @@ module TruncateTags
     meaning you won't have a &#60;p&#62; without it's closing tag. This tag may be used in
     2 modes. In one you work with HTML, in the other you work only with the text. 
     
-    In mode 1, your only options are the @length@ the @omission@ and the @omission_link@:
+    In mode 1, your options are the @length@ the @omission@ the @omission_link@ and the @ommission_link_url@:
     
     * @length@ is the number of words to display from the given content. This is 30 by default.
     * @omission@ is the text used inplace of the omitted content. This is "..." by default.
-    * @omission_link@ if set to 'true' will wrap the omission text in an anchor to the current page
+    * @omission_link@ if set to 'true' will wrap the omission text in an anchor to the current page.
+    * @ommission_link_url@ will set the url to be used when generating the omission link. By default the url of the current page is used.
     
     *Mode 1 Examples:*
     
@@ -40,24 +41,26 @@ module TruncateTags
   }
   tag 'truncate' do |tag|
         
-    content = tag.expand
-    length = tag.attr['length']
-    omission = tag.attr['omission']
-    options = {}
-    options[:length] = length.to_i if length
-    options[:omission] = omission if omission
-    options[:omission_link] = tag.attr['omission_link'] == 'true'
-    options[:omission_link_url] = tag.locals.page.url
+    content                     = tag.expand
+    length                      = tag.attr['length']
+    omission                    = tag.attr['omission']
+    options                     = {}
+    options[:length]            = length.to_i if length
+    options[:omission]          = omission if omission
+    options[:omission_link]     = tag.attr['omission_link'] == 'true'
+    options[:omission_link_url] = tag.attr['ommission_link_url'] || tag.locals.page.url
+
     helper = ActionView::Base.new
     
     strip_html = tag.attr['strip_html'] == 'true' # defaults to false. 'true' must be explicitly set
     if strip_html
-      content = content.mb_chars
-      content = helper.strip_tags(content)
+      content          = content.mb_chars
+      content          = helper.strip_tags(content)
       strip_whitespace = !(tag.attr['strip_whitespace'] == 'false') # defaults to true. 'false' must be explicitly set
-      content = content.strip.gsub(/\s+/, " ") if strip_whitespace
-      split_words = tag.attr['split_words'] == 'true' # defaults to false. 'true' must be explicitly set
-      content = split_words ? helper.truncate(content, options) : helper.truncate_words(content, options)
+      content          = content.strip.gsub(/\s+/, " ") if strip_whitespace
+      split_words      = tag.attr['split_words'] == 'true' # defaults to false. 'true' must be explicitly set
+      content          = split_words ? helper.truncate(content, options) : helper.truncate_words(content, options)
+
     else
       content = helper.truncate_html(content, options)
     end
@@ -69,29 +72,34 @@ end
 module ActionView::Helpers::TextHelper
 
   def truncate_words(text, *args)
-    text = text.mb_chars
-    options = args.extract_options!
+    text            = text.mb_chars
+    options         = args.extract_options!
     truncate_string = options[:omission] || '...'
-    length = options[:length] || 50
+    length          = options[:length] || 50
+
     return text if text.length <= length
+    
     length = (length - truncate_string.mb_chars.length)
-    str = text[0, length + 1] 
+    str    = text[0, length + 1] 
+
     return truncate_string unless str
-    idx = 0
+    idx      = 0
     last_idx = nil
+
     while(idx && last_idx != idx) do
       last_idx = idx
-      idx = str.index(/\s/, idx.to_i + 1)
+      idx      = str.index(/\s/, idx.to_i + 1)
     end
     (str[0, last_idx] + truncate_string).to_s
   end
   
   def truncate_html(input, *args)
-    options = args.extract_options!
-    truncate_string = options[:omission] || '...'
-    num_words = (options[:length] || 30).to_i
-  	fragment = Nokogiri::HTML.fragment(input)
+    options            = args.extract_options!
+    truncate_string    = options[:omission] || '...'
+    num_words          = (options[:length] || 30).to_i
+  	fragment           = Nokogiri::HTML.fragment(input)
   	has_been_truncated = false
+
 
   	current = fragment.children.first
   	count = 0
