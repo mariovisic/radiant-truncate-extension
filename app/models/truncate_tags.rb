@@ -6,12 +6,12 @@ module TruncateTags
     meaning you won't have a &#60;p&#62; without it's closing tag. This tag may be used in
     2 modes. In one you work with HTML, in the other you work only with the text. 
     
-    In mode 1, your options are the @length@ the @omission@ the @omission_link@ and the @ommission_link_url@:
+    In mode 1, your options are the @length@ the @omission@ the @omission_link@ and the @omission_link_url@:
     
     * @length@ is the number of words to display from the given content. This is 30 by default.
     * @omission@ is the text used inplace of the omitted content. This is "..." by default.
     * @omission_link@ if set to 'true' will wrap the omission text in an anchor to the current page.
-    * @ommission_link_url@ will set the url to be used when generating the omission link. By default the url of the current page is used.
+    * @omission_link_url@ will set the url to be used when generating the omission link. By default the url of the current page is used.
     
     *Mode 1 Examples:*
     
@@ -48,7 +48,7 @@ module TruncateTags
     options[:length]            = length.to_i if length
     options[:omission]          = omission if omission
     options[:omission_link]     = tag.attr['omission_link'] == 'true'
-    options[:omission_link_url] = tag.attr['ommission_link_url'] || tag.locals.page.url
+    options[:omission_link_url] = tag.attr['omission_link_url'] || tag.locals.page.url
 
     helper = ActionView::Base.new
     
